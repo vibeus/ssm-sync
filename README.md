@@ -5,7 +5,7 @@ This is an internal tool used by Vibe team to manage secrets stored in AWS SSM u
 ## Install
 
 ```shell
-go install github.com/vibeus/ssm-sync@v1.0.0
+go install github.com/vibeus/ssm-sync@v1.0.1
 ```
 
 ## Usage
