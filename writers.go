@@ -29,7 +29,6 @@ func NewVarFileWriter(file string) (*VarFileWriter, error) {
 	}
 
 	fmt.Fprintln(out, GeneratedContentNotice)
-	fmt.Fprintln(out)
 
 	return &VarFileWriter{out: out}, nil
 }
@@ -39,12 +38,12 @@ func (w *VarFileWriter) Close() error {
 }
 
 func (w *VarFileWriter) Write(resName, ssmName, varName string) error {
+	fmt.Fprintln(w.out)
 	fmt.Fprintf(w.out, `variable "%s" {
 	type = string
 	sensitive = true
 	description = "A secret store in SSM. Use ssm-sync to sync before apply."
 }`, varName)
-	fmt.Fprintln(w.out)
 	fmt.Fprintln(w.out)
 	return nil
 }
@@ -68,9 +67,6 @@ func NewTfVarFileWriter(file, region string) (*TfVarFileWriter, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Fprintln(out, GeneratedContentNotice)
-	fmt.Fprintln(out)
 
 	return &TfVarFileWriter{out: out, ssmSvc: ssmSvc}, nil
 }
