@@ -6,7 +6,7 @@ AWS SSM using Terraform.
 # Install
 
 ```shell
-go install github.com/vibeus/ssm-sync@v1.0.2
+go install github.com/vibeus/ssm-sync@v1.0.3
 ```
 
 # Usage
