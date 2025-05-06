@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -94,7 +95,7 @@ func (w *TfVarFileWriter) Write(resName, ssmName, varName string) error {
 		varValue = *param.Parameter.Value
 	}
 
-	fmt.Fprintf(w.out, `%s = "%s"`, varName, varValue)
+	fmt.Fprintf(w.out, `%s = %s`, varName, strconv.Quote(varValue))
 	fmt.Fprintln(w.out)
 	return nil
 }
