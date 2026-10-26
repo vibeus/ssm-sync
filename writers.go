@@ -1,15 +1,18 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path"
 	"strconv"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/ssm"
+	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
 )
 
 const GeneratedContentNotice = "# DO NOT ADD NEW VARIABLES TO THIS FILE. THEY ARE AUTO GENERATED. READ: https://github.com/vibeus/ssm-sync"
@@ -51,18 +54,16 @@ func (w *VarFileWriter) Write(resName, ssmName, varName string) error {
 
 type TfVarFileWriter struct {
 	out    io.WriteCloser
-	ssmSvc *ssm.SSM
+	ssmSvc *ssm.Client
 }
 
 func NewTfVarFileWriter(file, region string) (*TfVarFileWriter, error) {
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(region),
-	})
+	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(region))
 	if err != nil {
 		return nil, err
 	}
 
-	ssmSvc := ssm.New(sess)
+	ssmSvc := ssm.NewFromConfig(cfg)
 
 	out, err := os.Create(file)
 	if err != nil {
@@ -77,7 +78,7 @@ func (w *TfVarFileWriter) Close() error {
 }
 
 func (w *TfVarFileWriter) Write(resName, ssmName, varName string) error {
-	param, err := w.ssmSvc.GetParameter(&ssm.GetParameterInput{
+	param, err := w.ssmSvc.GetParameter(context.Background(), &ssm.GetParameterInput{
 		Name:           aws.String(ssmName),
 		WithDecryption: aws.Bool(true),
 	})
@@ -85,7 +86,8 @@ func (w *TfVarFileWriter) Write(resName, ssmName, varName string) error {
 	var varValue string
 
 	if err != nil {
-		if _, ok := err.(*ssm.ParameterNotFound); ok {
+		var notFound *types.ParameterNotFound
+		if errors.As(err, &notFound) {
 			fmt.Printf("%s is a new variable. Please update its value and run 'terraform apply'.\n", varName)
 			varValue = "-"
 		} else {
