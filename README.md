@@ -14,6 +14,12 @@ go install github.com/vibeus/ssm-sync@v1.0.4
 Make sure `ssm-sync` is in your $PATH.  Commands below should be run
 in the `ssm` folders of Terraform configuration.
 
+## AWS Credentials
+
+AWS credentials resolve the usual way (default profile in `~/.aws`, env
+vars including `AWS_SESSION_TOKEN`, `aws login` `login_session`
+sessions, SSO, …).
+
 ## Initial Pull
 
 This is useful if you want to keep your local .tfvars file up to date.
